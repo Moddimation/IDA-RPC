@@ -28,6 +28,7 @@ RichPresence::RichPresence( long long app_id ) : app_id_( app_id )
 
 RichPresence::~RichPresence()
 {
+        clear_presence();
         if ( discord )
         {
                 delete discord;
@@ -50,11 +51,6 @@ void RichPresence::update_presence( ::discord::Activity rpc )
                 {
                         if (result != Res::Ok) {
                             idarpc::log( LogLevel::Error, "Failed to update Presence." );
-                        } 
-                        else
-                        {
-                        
-                            idarpc::log( LogLevel::Error, "Update Presence." );
                         } } );
 }
 
@@ -67,9 +63,9 @@ void RichPresence::clear_presence()
 {
         if ( discord )
         {
-                discord->ActivityManager().ClearActivity( []( ::discord::Result result )
+                discord->ActivityManager().ClearActivity( []( Res result )
                         {
-                                if ( result != ::discord::Result::Ok )
+                                if ( result != Res::Ok )
                                 {
                                         idarpc::log( LogLevel::Error, "Failed to clear Presence." );
                                 }

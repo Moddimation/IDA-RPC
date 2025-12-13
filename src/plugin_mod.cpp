@@ -85,7 +85,6 @@ void ida_rpc_mod::clear_rich_presence()
 {
         if ( rpc )
         {
-                rpc->clear_presence();
                 delete rpc;
                 rpc = nullptr;
         }

@@ -25,5 +25,5 @@ plugin_t PLUGIN = {
         "Adds Discord Rich Presence integration for IDA.",
         "Discord Rich Presence",
         "IDA Discord RPC",
-        "Created by Reversed Codes",
+        "Created by Reversed Codes, updated by Moddimation",
 };

@@ -1,17 +1,40 @@
 #include "ida_helper.hpp"
 
+#include <bytes.hpp>
 #include <diskio.hpp>
 #include <idp.hpp>
+#include <kernwin.hpp>
+#include <loader.hpp>
+#include <name.hpp>
+#include <pro.h>
 
 #include "log/log.hpp"
 
-const char* idarpc::idahelper::get_filename()
+std::string idarpc::idahelper::get_filename()
 {
         char filename_buf[ 260 ] = {};
-        get_root_filename( filename_buf, sizeof( filename_buf ) );
-        return qstrdup( filename_buf );
-}
+        if ( !get_root_filename( filename_buf, sizeof( filename_buf ) ) )
+                return std::string( "undefined" );
 
+        return std::string( filename_buf );
+}
+std::string idarpc::idahelper::get_projectname()
+{
+        const char* full = get_path( PATH_TYPE_IDB );
+        const char* base = qbasename( full );
+        if ( base == nullptr )
+                return std::string( "undefined" );
+
+        return std::string( base );
+}
+std::string idarpc::idahelper::get_ida_version_string()
+{
+        char version[ 32 ] = { 0 };
+        if ( !get_kernel_version( version, sizeof( version ) ) )
+                return std::string( "undefined" );
+
+        return std::string( version );
+}
 bool idarpc::idahelper::is_ida_home_version()
 {
         qstrvec_t dirs;
