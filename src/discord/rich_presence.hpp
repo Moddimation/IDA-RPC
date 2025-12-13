@@ -1,22 +1,27 @@
 #pragma once
 
+#include <discord.h>
 #include <string>
-#include <discord_rpc.h>
 
-namespace idarpc::discord {
+namespace idarpc::discord
+{
 
-    class RichPresence {
-    public:
-        explicit RichPresence(const char* app_id);
+class RichPresence
+{
+public:
+        explicit RichPresence( long long app_id );
         ~RichPresence();
 
-        void update_presence(DiscordRichPresence rpc);
+        void update_presence( ::discord::Activity rpc );
 
         void clear_presence();
+        void callbacks();
 
-    private:
-        const char* app_id_;
-        bool initialized_ = false;
-    };
+        bool is_alive();
 
-}
+private:
+        long long        app_id_ = 0;
+        ::discord::Core* discord = nullptr;
+};
+
+} // namespace idarpc::discord
