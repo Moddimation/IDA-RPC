@@ -92,14 +92,13 @@ void ida_rpc_mod::clear_rich_presence()
 
 bool ida_rpc_mod::is_alive()
 {
-        return rpc != nullptr;
+        return rpc != nullptr && rpc->is_alive();
 }
-
 
 //Create
 ida_rpc_mod::ida_rpc_mod()
 {
-        char check;
+        char check = 0;
 
         check += init_discord_rpc();
         check += init_timer();

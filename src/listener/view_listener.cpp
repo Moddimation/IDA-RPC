@@ -1,6 +1,7 @@
 #include "view_listener.hpp"
 
 #include <chrono>
+#include <dbg.hpp>
 #include <fstream>
 #include <funcs.hpp>
 #include <hexrays.hpp>
@@ -16,7 +17,7 @@ std::string cache_string = "";
 namespace idarpc::listener
 {
 
-bool try_get_func_name( std::string* str )
+bool try_get_name( std::string* str )
 {
         if ( str == nullptr )
         {
@@ -34,6 +35,28 @@ bool try_get_func_name( std::string* str )
         if ( fn == nullptr )
         {
                 char buf[ 1024 ];
+
+                ea_t ref = get_first_fcref_from( ea );
+                if ( ref == BADADDR )
+                        ref = get_first_dref_from( ea );
+
+                if ( ref != BADADDR )
+                {
+                        qstring rname;
+
+                        func_t* rfn = get_func( ref );
+                        if ( rfn != nullptr )
+                                get_func_name( &rname, rfn->start_ea );
+                        else
+                                rname = get_name( ref );
+
+                        if ( !rname.empty() )
+                        {
+                                qsnprintf( buf, sizeof( buf ), "Ref: %s", rname.c_str() );
+                                *str = buf;
+                                return true;
+                        }
+                }
 
                 qstring nm = get_name( ea );
                 if ( !nm.empty() )
@@ -55,6 +78,51 @@ bool try_get_func_name( std::string* str )
         return true;
 }
 
+bool try_get_debugstate( std::string* str )
+{
+        if ( str == nullptr )
+        {
+                return false;
+        }
+
+        if ( !is_debugger_on() )
+                return false;
+
+        int state = get_process_state();
+
+        if ( state == DSTATE_RUN )
+        {
+                *str = "Debugging: Running";
+                return true;
+        }
+
+        if ( state == DSTATE_SUSP )
+        {
+                *str = "Debugging: Paused";
+                return true;
+        }
+
+        if ( state == DSTATE_NOTASK )
+        {
+                *str = "Debugging: Not Connected";
+                return true;
+        }
+
+        return true;
+}
+
+bool try_get_view( std::string* str, TWidget* view )
+{
+        qstring title;
+        if ( !get_widget_title( &title, view ) )
+        {
+                return false;
+        }
+
+        *str = std::string( "View: " ) + title.c_str();
+        return true;
+}
+
 void update_view_presence( const std::string text )
 {
         if ( text == cache_string )
@@ -67,13 +135,13 @@ void update_view_presence( const std::string text )
 
 void do_update_view_presence( TWidget* view )
 {
-        std::string text = "Decompiling";
-        if ( !try_get_func_name( &text ) )
+        std::string text = "Plugin Error";
+
+        if ( !try_get_debugstate( &text ) && !try_get_name( &text ) && !try_get_view( &text, view ) )
         {
-                qstring title;
-                if ( get_widget_title( &title, view ) )
-                        text = std::string( "View: " ) + title.c_str();
+                text = "Decompiling";
         }
+
         update_view_presence( text );
 }
 

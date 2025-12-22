@@ -12,6 +12,7 @@ RichPresence::RichPresence( long long app_id ) : app_id_( app_id )
 {
         idarpc::log( LogLevel::Info, "Initializing Rich Presence..." );
         Res res = ::discord::Core::Create( app_id, DiscordCreateFlags_Default, &discord );
+        idarpc::log( LogLevel::Info, "Checking for errors..." );
         if ( res != Res::Ok )
         {
                 if ( res == Res::NotRunning || res == Res::ServiceUnavailable )
@@ -22,6 +23,7 @@ RichPresence::RichPresence( long long app_id ) : app_id_( app_id )
                 {
                         idarpc::log( LogLevel::Warning, "Could not connect to Discord, RPC stop." );
                 }
+                discord = nullptr;
                 return;
         }
 }
@@ -29,7 +31,7 @@ RichPresence::RichPresence( long long app_id ) : app_id_( app_id )
 RichPresence::~RichPresence()
 {
         clear_presence();
-        if ( discord )
+        if ( is_alive() )
         {
                 delete discord;
                 discord = nullptr;
@@ -44,7 +46,7 @@ bool RichPresence::is_alive()
 
 void RichPresence::update_presence( ::discord::Activity rpc )
 {
-        if ( !discord )
+        if ( !is_alive() )
                 return;
 
         discord->ActivityManager().UpdateActivity( rpc, []( Res result )
@@ -61,7 +63,7 @@ void RichPresence::callbacks()
 
 void RichPresence::clear_presence()
 {
-        if ( discord )
+        if ( is_alive() )
         {
                 discord->ActivityManager().ClearActivity( []( Res result )
                         {
