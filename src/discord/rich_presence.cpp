@@ -11,7 +11,7 @@ namespace idarpc::discord
 RichPresence::RichPresence( long long app_id ) : app_id_( app_id )
 {
         idarpc::log( LogLevel::Info, "Initializing Rich Presence..." );
-        Res res = ::discord::Core::Create( app_id, DiscordCreateFlags_Default, &discord );
+        Res res = ::discord::Core::Create( app_id, DiscordCreateFlags_NoRequireDiscord, &discord );
         idarpc::log( LogLevel::Info, "Checking for errors..." );
         if ( res != Res::Ok )
         {
